@@ -22,6 +22,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Trust proxy for Render / Cloudflare reverse proxy (fixes X-Forwarded-For ValidationError)
+app.set('trust proxy', 1);
+
 // ── Security & parsing middleware ──────────────────────────────
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
@@ -56,6 +59,7 @@ app.use(cookieParser());
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 200,
+  validate: { xForwardedForHeader: false },
   message: { success: false, message: 'Too many requests, please try again later' },
 });
 app.use('/api', limiter);
